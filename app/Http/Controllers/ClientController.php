@@ -14,6 +14,10 @@ class ClientController extends Controller
         //
     }
 
+    public function showLogin(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    {
+         return view('layout.login');
+    }
     /**
      * Show the form for creating a new resource.
      */
