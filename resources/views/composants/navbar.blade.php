@@ -10,8 +10,7 @@
 <nav class="isi-nav">
     <div class="isi-nav__inner">
 
-        <!-- Logo -->
-        <a href="/" class="flex items-center space-x-2">
+        <a href="{{ route('home') }}" class="flex items-center space-x-2">
             <img src="{{ asset('images/logo.png') }}"
                  alt="ISIBurger Logo"
                  class="h-10 w-auto">
@@ -20,49 +19,64 @@
         {{-- MENU DESKTOP --}}
         <div class="isi-nav__links">
 
-            @auth
-                @if(auth()->user()->role === 'gestionnaire')
-                    <a href="#" class="isi-nav__link">
+            @if(auth('client')->check())
+                @php $user = auth('client')->user(); @endphp
+
+                @if($user->role === 'gestionnaire')
+                    <a href="{{ route('dashboardGestionnaire') }}" class="isi-nav__mobile-link">
                         <i class="fa-solid fa-gauge"></i> Dashboard
                     </a>
-
-                    <a href="#" class="isi-nav__link">
+                    <a href="{{ route('gestion.produits') }}" class="isi-nav__link">
                         <i class="fa-solid fa-burger"></i> Produits
                     </a>
-
                     <a href="#" class="isi-nav__link">
                         <i class="fa-solid fa-cart-shopping"></i> Commandes
                     </a>
-
                     <a href="#" class="isi-nav__link">
                         <i class="fa-solid fa-credit-card"></i> Paiements
                     </a>
-
                     <a href="#" class="isi-nav__link">
                         <i class="fa-solid fa-chart-line"></i> Statistiques
                     </a>
 
-                @elseif(auth()->user()->role === 'client')
-                    <a href="#" class="isi-nav__link">
+                @elseif($user->role === 'client')
+                    <a href="{{ route('catalogue') }}" class="isi-nav__link">
                         <i class="fa-solid fa-burger"></i> Catalogue
                     </a>
-
                     <a href="#" class="isi-nav__link">
                         <i class="fa-solid fa-box"></i> Mes Commandes
                     </a>
 
-                    <a href="#" class="isi-nav__cart">
+                    {{-- ICÔNE PANIER avec badge dynamique --}}
+                    <a href="#" class="isi-nav__cart" style="position: relative; display: inline-flex; align-items: center;">
                         <i class="fa-solid fa-cart-shopping"></i>
-                        <span class="isi-nav__badge">0</span>
+                        {{-- Le badge : caché par défaut, mis à jour par Cart.updateBadge() --}}
+                        <span class="isi-nav__badge"
+                              style="display: none;
+                                     position: absolute;
+                                     top: -8px;
+                                     right: -10px;
+                                     min-width: 18px;
+                                     height: 18px;
+                                     padding: 0 4px;
+                                     border-radius: 999px;
+                                     background: #f97316;
+                                     color: white;
+                                     font-size: 11px;
+                                     font-weight: 800;
+                                     align-items: center;
+                                     justify-content: center;">
+                            0
+                        </span>
                     </a>
                 @endif
 
                 {{-- PROFIL --}}
                 <div class="isi-nav__user">
                     <i class="fa-solid fa-user"></i>
-                    <span>{{ auth()->user()->name }}</span>
+                    <span>{{ $user->prenom }}</span>
 
-                    @if(auth()->user()->role === 'gestionnaire')
+                    @if($user->role === 'gestionnaire')
                         <span class="isi-nav__role-badge isi-nav__role-badge--gestionnaire">Gestionnaire</span>
                     @else
                         <span class="isi-nav__role-badge isi-nav__role-badge--client">Client</span>
@@ -70,7 +84,7 @@
                 </div>
 
                 {{-- DÉCONNEXION --}}
-                <form method="POST" action="/logout">
+                <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="isi-nav__logout">
                         <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
@@ -78,10 +92,10 @@
                 </form>
 
             @else
-                <a href="login" class="isi-nav__link">
+                <a href="{{ route('login') }}" class="isi-nav__link">
                     <i class="fa-solid fa-right-to-bracket"></i> Connexion
                 </a>
-            @endauth
+            @endif
 
         </div>
 
@@ -94,59 +108,33 @@
 
     {{-- MENU MOBILE --}}
     <div id="mobile-menu" class="isi-nav__mobile hidden">
-        @auth
-            @if(auth()->user()->role === 'gestionnaire')
-                <a href="#" class="isi-nav__mobile-link">
-                    <i class="fa-solid fa-gauge"></i> Dashboard
-                </a>
+        @if(auth('client')->check())
+            @php $user = auth('client')->user(); @endphp
 
-                <a href="#" class="isi-nav__mobile-link">
-                    <i class="fa-solid fa-burger"></i> Produits
-                </a>
-
-                <a href="#" class="isi-nav__mobile-link">
-                    <i class="fa-solid fa-cart-shopping"></i> Commandes
-                </a>
-
-                <a href="#" class="isi-nav__mobile-link">
-                    <i class="fa-solid fa-credit-card"></i> Paiements
-                </a>
-
-                <a href="#" class="isi-nav__mobile-link">
-                    <i class="fa-solid fa-chart-line"></i> Statistiques
-                </a>
+            @if($user->role === 'gestionnaire')
+                <a href="{{ route('dashboardGestionnaire') }}"  class="isi-nav__mobile-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+                <a href="{{ route('gestion.produits') }}"  class="isi-nav__mobile-link"><i class="fa-solid fa-burger"></i> Produits</a>
             @else
-                <a href="#" class="isi-nav__mobile-link">
-                    <i class="fa-solid fa-burger"></i> Catalogue
-                </a>
-
-                <a href="#" class="isi-nav__mobile-link">
-                    <i class="fa-solid fa-box"></i> Mes Commandes
-                </a>
-
-                <a href="#" class="isi-nav__mobile-link">
-                    <i class="fa-solid fa-cart-shopping"></i> Panier
-                </a>
+                <a href="{{ route('catalogue') }}" class="isi-nav__mobile-link"><i class="fa-solid fa-burger"></i> Catalogue</a>
+                <a href="#" class="isi-nav__mobile-link"><i class="fa-solid fa-box"></i> Mes Commandes</a>
             @endif
 
             <div class="isi-nav__mobile-user">
-                <i class="fa-solid fa-user"></i> {{ auth()->user()->name }}
+                <i class="fa-solid fa-user"></i> {{ $user->prenom }}
             </div>
 
-            <form method="POST" action="/logout">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="isi-nav__mobile-logout">
                     <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
                 </button>
             </form>
         @else
-            <a href="/login" class="isi-nav__mobile-link">
-                <i class="fa-solid fa-right-to-bracket"></i> Connexion
-            </a>
-        @endauth
+            <a href="{{ route('catalogue') }}" class="isi-nav__mobile-link">Catalogue</a>
+            <a href="{{ route('login') }}" class="isi-nav__mobile-link">Connexion</a>
+        @endif
     </div>
 </nav>
-
 
 </body>
 </html>

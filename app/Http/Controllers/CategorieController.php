@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categorie;
+use App\Models\Produit;
 use Illuminate\Http\Request;
 
 class CategorieController extends Controller
@@ -11,7 +13,9 @@ class CategorieController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Categorie::all();
+        $produits = Produit::all();
+        return view('categorie.index', compact('categories', 'produits'));
     }
 
     /**
@@ -27,7 +31,13 @@ class CategorieController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'libelle' => 'required|string|max:255',
+        ]);
+        Categorie::create([
+            'libelle' => $request->libelle,
+        ]);
+        return redirect()->back()->with('success', 'Catégorie ajoutée avec succès !');
     }
 
     /**

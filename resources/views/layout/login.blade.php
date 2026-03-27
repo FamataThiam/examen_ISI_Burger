@@ -7,7 +7,6 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        /* ---- Le CSS que tu avais déjà ---- */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
             --orange: #F04E23; --orange-deep: #C93B14; --cream: #FDF6EC;
@@ -23,9 +22,9 @@
             background-image:
                 radial-gradient(ellipse 80% 60% at 20% 10%, rgba(240,78,35,0.08) 0%, transparent 60%),
                 radial-gradient(ellipse 60% 50% at 80% 90%, rgba(240,78,35,0.06) 0%, transparent 60%);
-            overflow: hidden;
+            overflow-y: auto;
+            padding: 32px 16px;
         }
-        /* Floating food elements */
         .float-el { position: fixed; font-size: 2rem; opacity: 0.12; animation: floatUp linear infinite; pointer-events: none; user-select: none; }
         @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.12; } 90% { opacity: 0.12; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
         .wrapper { display: flex; width: min(900px, 95vw); min-height: 520px; border-radius: 24px; overflow: hidden;
@@ -33,7 +32,6 @@
             animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0;
         }
         @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-        /* LEFT panel */
         .panel-left { flex: 1; background: var(--orange); background-image:
             radial-gradient(ellipse at 30% 70%, rgba(255,255,255,0.15) 0%, transparent 60%),
             radial-gradient(ellipse at 80% 20%, var(--orange-deep) 0%, transparent 50%);
@@ -56,11 +54,24 @@
         .btn-submit::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent); border-radius: inherit; }
         .btn-submit:hover { background: var(--orange-deep); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(240,78,35,0.35); } .btn-submit:active { transform: translateY(0); }
         .error-box { background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; color: #DC2626; font-size: 0.85rem; padding: 10px 14px; margin-bottom: 20px; }
+        .success-box { background: #DCFCE7; border: 1px solid #86EFAC; border-radius: 8px; color: #166534; font-size: 0.85rem; padding: 10px 14px; margin-bottom: 20px; }
         .bottom-note { text-align: center; margin-top: 20px; font-size: 0.78rem; color: var(--warm-gray); } .bottom-note a { color: var(--orange); text-decoration: none; font-weight: 500; }
         @media (max-width: 660px) { .panel-left { display: none; } .panel-right { width: 100%; padding: 40px 28px; } }
     </style>
 </head>
 <body>
+
+@php
+    // active_tab est flashé par le controller register en cas d'erreur.
+    // Sur une visite fraîche ou après login échoué → 'login'.
+    if (session('active_tab')) {
+        $activeTab = session('active_tab'); // 'register' flashé par le controller
+    } elseif ($errors->has('login_error')) {
+        $activeTab = 'login';
+    } else {
+        $activeTab = 'login'; // visite fraîche → toujours login
+    }
+@endphp
 
 <div class="wrapper">
 
@@ -82,12 +93,24 @@
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab(this, 'login')">Se connecter</button>
-            <button class="tab-btn" onclick="switchTab(this, 'register')">S'inscrire</button>
+            <button class="tab-btn {{ $activeTab === 'login' ? 'active' : '' }}" onclick="switchTab(this, 'login')">Se connecter</button>
+            <button class="tab-btn {{ $activeTab === 'register' ? 'active' : '' }}" onclick="switchTab(this, 'register')">S'inscrire</button>
         </div>
 
-        <!-- LOGIN FORM -->
-        <form id="form-login" method="POST" action="{{ route('login') }}">
+        @if(session('success'))
+            <div class="success-box">{{ session('success') }}</div>
+        @endif
+
+        <!-- ========== LOGIN FORM ========== -->
+        {{-- Champ honeypot invisible : trompe l'autocomplete du navigateur --}}
+        <input type="text"    name="fake_user_login"    style="display:none" tabindex="-1" aria-hidden="true">
+        <input type="password" name="fake_pass_login"   style="display:none" tabindex="-1" aria-hidden="true">
+
+        <form id="form-login"
+              method="POST"
+              action="{{ route('login.submit') }}"
+              autocomplete="off"
+              style="{{ $activeTab === 'login' ? '' : 'display:none;' }}">
             @csrf
 
             @if($errors->has('login_error'))
@@ -101,7 +124,15 @@
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                         <polyline points="22,6 12,13 2,6"/>
                     </svg>
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="vous@exemple.com" required>
+                    {{-- value="" forcé — jamais de old() sur le login --}}
+                    <input
+                        type="email"
+                        name="email"
+                        value=""
+                        placeholder="vous@exemple.com"
+                        autocomplete="new-password"
+                        required
+                    >
                 </div>
             </div>
 
@@ -112,7 +143,7 @@
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
-                    <input type="password" name="password" placeholder="••••••••" required>
+                    <input type="password" name="password" value="" placeholder="••••••••" autocomplete="new-password" required>
                 </div>
             </div>
 
@@ -120,22 +151,56 @@
             <button type="submit" class="btn-submit">Se connecter →</button>
         </form>
 
-        <!-- REGISTER FORM -->
-        <form id="form-register" method="POST" action="{{ route('register') }}" style="display:none;">
+        <!-- ========== REGISTER FORM ========== -->
+        <form id="form-register"
+              method="POST"
+              action="{{ route('register') }}"
+              autocomplete="off"
+              style="{{ $activeTab === 'register' ? '' : 'display:none;' }}">
             @csrf
 
-            @if($errors->any())
+            @if($activeTab === 'register' && $errors->any())
                 <div class="error-box">{{ $errors->first() }}</div>
             @endif
 
             <div class="field">
-                <label>Nom complet</label>
+                <label>Nom</label>
                 <div class="input-wrap">
                     <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                         <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    <input type="text" name="name" value="{{ old('name') }}" placeholder="Moussa Diallo" required>
+                    {{-- old() only keeps values when validation failed (register tab) --}}
+                    <input type="text" name="nom"
+                           value="{{ $activeTab === 'register' ? old('nom') : '' }}"
+                           placeholder="Diallo" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Prénom</label>
+                <div class="input-wrap">
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <input type="text" name="prenom"
+                           value="{{ $activeTab === 'register' ? old('prenom') : '' }}"
+                           placeholder="Moussa" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Adresse</label>
+                <div class="input-wrap">
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 21s-6-4.35-6-10a6 6 0 1 1 12 0c0 5.65-6 10-6 10z"/>
+                        <circle cx="12" cy="11" r="2"/>
+                    </svg>
+                    <input type="text" name="adresse"
+                           value="{{ $activeTab === 'register' ? old('adresse') : '' }}"
+                           placeholder="Dakar, Rufisque..."
+                           required>
                 </div>
             </div>
 
@@ -146,7 +211,9 @@
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                         <polyline points="22,6 12,13 2,6"/>
                     </svg>
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="vous@exemple.com" required>
+                    <input type="email" name="email"
+                           value="{{ $activeTab === 'register' ? old('email') : '' }}"
+                           placeholder="vous@exemple.com" required>
                 </div>
             </div>
 
@@ -157,7 +224,19 @@
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
-                    <input type="password" name="password" placeholder="••••••••" required>
+                    <input type="password" name="password" placeholder="••••••••" autocomplete="new-password" required>
+                </div>
+            </div>
+
+            {{-- Champ de confirmation obligatoire pour la validation 'confirmed' --}}
+            <div class="field">
+                <label>Confirmer le mot de passe</label>
+                <div class="input-wrap">
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <input type="password" name="password_confirmation" placeholder="••••••••" autocomplete="new-password" required>
                 </div>
             </div>
 
@@ -171,7 +250,7 @@
     function switchTab(btn, tab) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('form-login').style.display   = tab === 'login'    ? '' : 'none';
+        document.getElementById('form-login').style.display    = tab === 'login'    ? '' : 'none';
         document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
     }
 </script>

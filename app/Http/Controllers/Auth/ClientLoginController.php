@@ -7,67 +7,90 @@ use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
 class ClientLoginController extends Controller
 {
     public function showLogin()
     {
+        // Si déjà connecté → on redirige directement
+        if (Auth::guard('client')->check()) {
+            return redirect()->route('dashboard');
+        }
+
+        session()->forget('_old_input');
         return view('layout.login');
     }
 
-    // Login
+    // ─── Login ────────────────────────────────────────────────────────────────
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => ['required','email'],
-            'password' => ['required'],
-        ]);
-
-        $client = Client::where('email', $request->email)->first();
-
-        if (!$client || !Hash::check($request->password, $client->password)) {
-            return back()->withErrors(['login_error' => 'Adresse e-mail ou mot de passe incorrect.'])->withInput();
+        // validate() appelle withInput() automatiquement si ça échoue.
+        // On valide manuellement pour éviter ça sur le login.
+        if (! $request->filled('email') || ! $request->filled('password')) {
+            return back()->withErrors(['login_error' => 'Veuillez remplir tous les champs.']);
+            // Pas de withInput() → champs vides
         }
 
-        // ⚡ Utiliser le guard 'client'
-        Auth::guard('client')->login($client);
+        $client = \App\Models\Client::where('email', $request->email)->first();
 
-        return redirect()->route('dashboard');
+        if (! $client || ! \Illuminate\Support\Facades\Hash::check($request->password, $client->password)) {
+            return back()
+                ->withErrors(['login_error' => 'Adresse e-mail ou mot de passe incorrect.']);
+            // Pas de withInput() → champs toujours vides
+        }
+
+        Auth::guard('client')->login($client);
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Connexion réussie !');
     }
 
-    // Inscription
+    // ─── Inscription ─────────────────────────────────────────────────────────
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:clients,email',
-            'password' => ['required', 'confirmed', Password::defaults()],
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'nom'                  => ['required', 'string', 'max:255'],
+            'prenom'               => ['required', 'string', 'max:255'],
+            'email'                => ['required', 'email', 'unique:clients,email'],
+            'adresse'              => ['required', 'string', 'max:255'],
+            'password'             => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $names = explode(' ', $request->name, 2);
-        $nom = $names[0];
-        $prenom = $names[1] ?? '';
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                // Garde nom/prenom/email mais JAMAIS les mots de passe
+                ->withInput($request->except(['password', 'password_confirmation']))
+                // Dit au blade d'afficher l'onglet register avec les erreurs
+                ->with('active_tab', 'register');
+        }
 
         $client = Client::create([
-            'nom' => $nom,
-            'prenom' => $prenom,
-            'email' => $request->email,
+            'nom'      => $request->nom,
+            'prenom'   => $request->prenom,
+            'email'    => $request->email,
+            'adresse'  => $request->adresse,
             'password' => Hash::make($request->password),
-            'role' => 'client',
+            'role'     => 'client',
         ]);
 
         Auth::guard('client')->login($client);
+        $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')
+            ->with('success', 'Inscription réussie !');
     }
 
-    // Logout
+    // ─── Logout ───────────────────────────────────────────────────────────────
     public function logout(Request $request)
     {
         Auth::guard('client')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login');
     }
 }
