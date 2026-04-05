@@ -12,14 +12,11 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
-     */
-    public function run(): void
-    {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-    }
+     */public function run(): void
+{
+    // C'est ici qu'on dit à Laravel d'exécuter ton seeder de clients
+    $this->call([
+        ClientSeeder::class,
+    ]);
+}
 }

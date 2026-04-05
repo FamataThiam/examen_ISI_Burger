@@ -2,63 +2,249 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\FactureCommande;
+use App\Models\Categorie;
+use App\Models\Commande;
+use App\Models\CommandeProduit;
+use App\Models\Paiement;
+use App\Models\Produit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class CommandeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $user = Auth::guard('client')->user();
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+
+        if ($user->isGestionnaire()) {
+            $commandes = Commande::with('client')->latest()->get();
+            return view('layout.gestionnaire.ListCommande', compact('commandes'));
+        }
+
+
+        $commandes = $user->commandes()->latest()->get();
+        return view('layout.Commandes.index', compact('commandes'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $client = Auth::guard('client')->user();
+        $produits = $request->input('produits');
+        $total = $request->input('total');
+
+        if (empty($produits)) {
+            return response()->json(['success' => false, 'error' => 'Le panier est vide.'], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 1. VÉRIFICATION DES STOCKS (Point 1.8) [cite: 8]
+            foreach ($produits as $item) {
+                $produit = Produit::find($item['id']);
+                if (!$produit || $produit->stock < $item['quantite']) {
+                    // Mail de refus si stock insuffisant [cite: 42]
+                    try {
+                        Mail::to('famatat3@gmail.com')->send(new \App\Mail\CommandeRefuseeStock($produit->nom, $client->prenom));
+                    } catch (\Exception $e) {}
+
+                    throw new \Exception("Stock insuffisant pour {$item['nom']}.");
+                }
+            }
+
+            // 2. CRÉATION DE LA COMMANDE [cite: 14]
+            $commande = Commande::create([
+                'date_commande' => now(),
+                'total'         => $total,
+                'etat'          => 'en_attente', // [cite: 20]
+                'client_id'     => $client->id
+            ]);
+
+            // 3. APPEL AU PAIEMENT CONTROLLER (Ta demande) [cite: 24, 25]
+            PaiementController::enregistrerPaiement($commande->id, $total);
+
+            // 4. PRODUITS ET STOCKS
+            foreach ($produits as $item) {
+                $produit = Produit::find($item['id']);
+
+                CommandeProduit::create([
+                    'commande_id'  => $commande->id,
+                    'produit_id'   => $item['id'],
+                    'quantite'     => $item['quantite'],
+                    'prixUnitaire' => $item['prix'],
+                    'prixTotal'    => $item['prix'] * $item['quantite'],
+                ]);
+
+                $produit->decrement('stock', $item['quantite']); // Mise à jour du stock [cite: 8]
+            }
+
+            DB::commit();
+
+            // 5. MAIL DE CONFIRMATION [cite: 40]
+            try {
+                Mail::to('famatat3@gmail.com')->send(new \App\Mail\ConfirmationCommande($commande));
+            } catch (\Exception $e) {}
+
+            return response()->json(['success' => true, 'message' => 'Commande et paiement validés !']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 400);
+        }
     }
 
     /**
-     * Display the specified resource.
+     * Méthode spécifique pour le bouton du gestionnaire
      */
-    public function show(string $id)
+    // CommandeController.php
+
+    public function marquerPrete($id)
     {
-        //
+        $commande = Commande::with('client')->findOrFail($id);
+
+        if ($commande->etat === 'payee') {
+            return back()->with('info', 'Commande déjà payée.');
+        }
+
+        if ($commande->etat === 'prete') {
+            // Deuxième clic → on passe à payée
+            $commande->etat = 'payee';
+            $commande->save();
+
+            return redirect()->route('commandes.index')
+                ->with('success', 'Commande marquée comme payée !');
+        }
+
+        // Premier clic → on passe à prête + envoi mail
+        $commande->etat = 'prete';
+        $commande->save();
+
+        try {
+            Mail::to($commande->client->email)
+                ->send(new FactureCommande($commande));
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Commande prête mais erreur mail : ' . $e->getMessage());
+        }
+
+        return redirect()->route('commandes.index')
+            ->with('success', 'Commande prête + facture envoyée !');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function show(Commande $commande)
     {
-        //
+        $commande->load('produits.produit');
+        return view('layout.Commandes.show', compact('commande'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function commandesPayees()
     {
-        //
+        $user = Auth::guard('client')->user();
+
+        // Sécurité : seul le gestionnaire peut voir
+        if (!$user || !$user->isGestionnaire()) {
+            return redirect()->route('login');
+        }
+
+        // Récupérer uniquement les commandes payées
+        $commandes = Commande::with('client')
+            ->whereRaw("LOWER(TRIM(etat)) = ?", ['payee'])
+            ->latest()
+            ->get();
+
+        // Calcul du total encaissé
+        $totalEncaisse = $commandes->sum('total');
+
+        return view('layout.gestionnaire.CommandesPayees', compact('commandes', 'totalEncaisse'));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+
+
+    public function tableaudeboard()
     {
-        //
+        // Récupération des données réelles pour le dashboard [cite: 34, 35, 36]
+        $recettesJour = Paiement::whereDate('date_paiement', Carbon::today())->sum('montant');
+        $commandesEnCours = Commande::whereDate('created_at', Carbon::today())
+            ->whereIn('etat', ['en_attente', 'en_preparation'])
+            ->count();
+        $commandesValidees = Commande::whereDate('created_at', Carbon::today())
+            ->whereIn('etat', ['prete', 'payee'])
+            ->count();
+        $produitsEpuises = Produit::where('stock', '<=', 0)->count();
+
+        // Récupération des 5 dernières commandes pour le tableau [cite: 17]
+        $dernieresCommandes = Commande::with('client')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Envoi de TOUTES les variables à la vue
+        return view('layout.gestionnaire.dashboardGestionnaire', compact(
+            'recettesJour',
+            'commandesEnCours',
+            'commandesValidees',
+            'produitsEpuises',
+            'dernieresCommandes'
+        ));
+    }
+
+
+    public function statistiques()
+    {
+        // ================================
+        // 📈 COMMANDES PAR MOIS (POSTGRESQL)
+        // ================================
+        $commandesParMois = DB::table('commandes')
+            ->select(
+                DB::raw('EXTRACT(MONTH FROM created_at) as mois'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereRaw('EXTRACT(YEAR FROM created_at) = ?', [Carbon::now()->year])
+            ->groupBy(DB::raw('EXTRACT(MONTH FROM created_at)'))
+            ->orderBy(DB::raw('EXTRACT(MONTH FROM created_at)'))
+            ->get();
+
+        $labelsMois = [];
+        $dataCommandes = [];
+
+        foreach ($commandesParMois as $item) {
+            $labelsMois[] = Carbon::create()
+                ->month((int)$item->mois)
+                ->locale('fr')
+                ->translatedFormat('F');
+
+            $dataCommandes[] = $item->total;
+        }
+
+        // ================================
+        // 📊 PRODUITS PAR CATÉGORIE (ELOQUENT PROPRE)
+        // ================================
+        $categories = Categorie::withCount('produits')->get();
+
+        $labelsCategories = [];
+        $dataProduits = [];
+
+        foreach ($categories as $cat) {
+            $labelsCategories[] = $cat->libelle; // ✅ colonne correcte
+            $dataProduits[] = $cat->produits_count;
+        }
+
+        // ================================
+        // 📤 ENVOI À LA VUE
+        // ================================
+        return view('layout.gestionnaire.statistiques', compact(
+            'labelsMois',
+            'dataCommandes',
+            'labelsCategories',
+            'dataProduits'
+        ));
     }
 }

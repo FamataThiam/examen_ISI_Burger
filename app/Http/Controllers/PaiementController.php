@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Paiement;
 use Illuminate\Http\Request;
 
 class PaiementController extends Controller
@@ -60,5 +61,14 @@ class PaiementController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public static function enregistrerPaiement($commandeId, $montant)
+    {
+        return Paiement::create([
+            'commande_id'   => $commandeId,
+            'date_paiement' => now(),
+            'montant'       => $montant,
+        ]);
     }
 }

@@ -25,9 +25,24 @@ class CommandeProduitController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    // Dans ton CommandeController.php
+    public function storeDetails(Request $request)
     {
-        //
+
+        $produitsAEnregistrer = $request->input('produits');
+
+        foreach ($produitsAEnregistrer as $item) {
+            // C'est ici qu'on utilise le modèle CommandeProduit
+            \App\Models\CommandeProduit::create([
+                'commande_id'  => $request->input('commande_id'),
+                'produit_id'   => $item['id'],
+                'quantite'     => $item['quantite'],
+                'prixUnitaire' => $item['prix'],
+                'prixTotal'    => $item['prix'] * $item['quantite'],
+            ]);
+        }
+
+        return response()->json(['message' => 'Détails enregistrés avec succès']);
     }
 
     /**

@@ -360,7 +360,7 @@
                 <div class="panier-toolbar">
                     <h2>Articles ajoutés</h2>
                     <button class="btn-select-all" onclick="PanierManager.toggleAll()">
-                        <i class="fa-solid fa-check-double"></i>
+                        <i class="fa-regular fa-check"></i>
                         <span id="select-all-label">Tout sélectionner</span>
                     </button>
                 </div>
@@ -419,30 +419,19 @@
     </div>
 
     <script>
-        /* ================================================================
-           PANIER MANAGER
-           Les produits sont stockés dans localStorage sous la clé 'cart_items'
-           Format : [{ id, libelle, prix, categorie, image, quantite }, ...]
-           ================================================================ */
         const PanierManager = {
+            items: [],
+            checked: {},
 
-            items: [],   // tous les articles du panier
-            checked: {}, // { id: true/false } — état des cases à cocher
-
-            /* ── INIT ── */
             init() {
                 this.items = JSON.parse(localStorage.getItem('cart_items') || '[]');
-
-                // Par défaut tous cochés
                 this.items.forEach(item => {
                     this.checked[item.id] = this.checked[item.id] ?? true;
                 });
-
                 this.render();
                 this.updateRecap();
             },
 
-            /* ── RENDU DE LA LISTE ── */
             render() {
                 const list = document.getElementById('cart-list');
                 const empty = document.getElementById('cart-empty');
@@ -456,58 +445,38 @@
                 empty.style.display = 'none';
 
                 list.innerHTML = this.items.map((item, idx) => `
-            <div class="cart-item ${this.checked[item.id] ? 'checked' : ''}"
-                 id="item-${item.id}"
-                 style="animation-delay:${idx * 0.05}s">
-
-                <input type="checkbox"
-                       class="item-checkbox"
-                       ${this.checked[item.id] ? 'checked' : ''}
-                       onchange="PanierManager.toggleCheck(${item.id}, this.checked)">
-
-                <div class="item-img">
-                    ${item.image
-                    ? `<img src="/storage/${item.image}" alt="${item.libelle}">`
-                    : `<i class="fa-solid fa-burger"></i>`}
-                </div>
-
-                <div class="item-info">
-                    <h3>${item.libelle}</h3>
-                    <span class="item-cat">${item.categorie ?? 'Menu'}</span>
-                    <div class="item-price">
-                        ${(item.prix * item.quantite).toLocaleString('fr-FR')}
-                        <small>FCFA</small>
-                        ${item.quantite > 1
-                    ? `<span style="font-size:.75rem;font-weight:500;color:#94a3b8;margin-left:4px;">(${item.prix.toLocaleString('fr-FR')} × ${item.quantite})</span>`
-                    : ''}
+                    <div class="cart-item ${this.checked[item.id] ? 'checked' : ''}" id="item-${item.id}" style="animation-delay:${idx * 0.05}">
+                        <input type="checkbox" class="item-checkbox" ${this.checked[item.id] ? 'checked' : ''} onchange="PanierManager.toggleCheck(${item.id}, this.checked)">
+                        <div class="item-img">
+                            ${item.image ? `<img src="/storage/${item.image}" alt="${item.libelle}">` : `<i class="fa-solid fa-burger"></i>`}
+                        </div>
+                        <div class="item-info">
+                            <h3>${item.libelle}</h3>
+                            <span class="item-cat">${item.categorie ?? 'Menu'}</span>
+                            <div class="item-price">
+                                ${(item.prix * item.quantite).toLocaleString('fr-FR')} <small>FCFA</small>
+                            </div>
+                        </div>
+                        <div class="item-qty">
+                            <button class="qty-btn" onclick="PanierManager.changeQty(${item.id}, -1)">−</button>
+                            <span class="qty-value">${item.quantite}</span>
+                            <button class="qty-btn" onclick="PanierManager.changeQty(${item.id}, +1)">+</button>
+                        </div>
+                        <button class="btn-remove" onclick="PanierManager.remove(${item.id})" title="Retirer">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
-                </div>
-
-                <div class="item-qty">
-                    <button class="qty-btn" onclick="PanierManager.changeQty(${item.id}, -1)">−</button>
-                    <span class="qty-value">${item.quantite}</span>
-                    <button class="qty-btn" onclick="PanierManager.changeQty(${item.id}, +1)">+</button>
-                </div>
-
-                <button class="btn-remove" onclick="PanierManager.remove(${item.id})" title="Retirer">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-        `).join('');
-
+                `).join('');
                 this.updateSelectAllLabel();
             },
 
-            /* ── COCHER / DÉCOCHER ── */
             toggleCheck(id, isChecked) {
                 this.checked[id] = isChecked;
-                const card = document.getElementById(`item-${id}`);
-                card?.classList.toggle('checked', isChecked);
+                document.getElementById(`item-${id}`)?.classList.toggle('checked', isChecked);
                 this.updateRecap();
                 this.updateSelectAllLabel();
             },
 
-            /* ── TOUT SÉLECTIONNER / DÉSÉLECTIONNER ── */
             toggleAll() {
                 const allChecked = this.items.every(i => this.checked[i.id]);
                 this.items.forEach(i => { this.checked[i.id] = !allChecked; });
@@ -517,11 +486,9 @@
 
             updateSelectAllLabel() {
                 const allChecked = this.items.length > 0 && this.items.every(i => this.checked[i.id]);
-                document.getElementById('select-all-label').textContent =
-                    allChecked ? 'Tout désélectionner' : 'Tout sélectionner';
+                document.getElementById('select-all-label').textContent = allChecked ? 'Tout désélectionner' : 'Tout sélectionner';
             },
 
-            /* ── QUANTITÉ ── */
             changeQty(id, delta) {
                 const item = this.items.find(i => i.id === id);
                 if (!item) return;
@@ -531,7 +498,6 @@
                 this.updateRecap();
             },
 
-            /* ── SUPPRIMER ── */
             remove(id) {
                 const card = document.getElementById(`item-${id}`);
                 if (card) {
@@ -546,36 +512,25 @@
                 }
             },
 
-            /* ── RÉCAPITULATIF ── */
             updateRecap() {
                 const selected = this.items.filter(i => this.checked[i.id]);
                 const count = selected.length;
                 const total = selected.reduce((sum, i) => sum + i.prix * i.quantite, 0);
 
-                document.getElementById('recap-selected-text').textContent =
-                    `${count} article${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`;
+                document.getElementById('recap-selected-text').textContent = `${count} article${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`;
+                document.getElementById('recap-lines').innerHTML = selected.map(i => `
+                    <div class="recap-line">
+                        <span>${i.libelle} ×${i.quantite}</span>
+                        <span>${(i.prix * i.quantite).toLocaleString('fr-FR')} FCFA</span>
+                    </div>
+                `).join('') || '<p style="color:#94a3b8;font-size:.85rem;text-align:center;margin-bottom:8px;">Aucun article sélectionné</p>';
 
-                // Lignes détail
-                const lines = document.getElementById('recap-lines');
-                lines.innerHTML = selected.map(i => `
-            <div class="recap-line">
-                <span>${i.libelle} ×${i.quantite}</span>
-                <span>${(i.prix * i.quantite).toLocaleString('fr-FR')} FCFA</span>
-            </div>
-        `).join('') || '<p style="color:#94a3b8;font-size:.85rem;text-align:center;margin-bottom:8px;">Aucun article sélectionné</p>';
+                document.getElementById('recap-total').textContent = total.toLocaleString('fr-FR') + ' FCFA';
+                document.getElementById('btn-commander').disabled = count === 0;
 
-                document.getElementById('recap-total').textContent =
-                    total.toLocaleString('fr-FR') + ' FCFA';
-
-                const btn = document.getElementById('btn-commander');
-                btn.disabled = count === 0;
-
-                // Mettre à jour le badge navbar
-                const totalQty = this.items.reduce((s, i) => s + i.quantite, 0);
-                this.updateBadgeNav(totalQty);
+                this.updateBadgeNav(this.items.reduce((s, i) => s + i.quantite, 0));
             },
 
-            /* ── BADGE NAVBAR ── */
             updateBadgeNav(count) {
                 localStorage.setItem('cart_count', count);
                 document.querySelectorAll('.isi-nav__badge').forEach(b => {
@@ -584,49 +539,55 @@
                 });
             },
 
-            /* ── SAUVEGARDER ── */
             save() {
                 localStorage.setItem('cart_items', JSON.stringify(this.items));
             },
 
-            /* ── COMMANDER ── */
+            /* ── APPEL AU CONTROLLER ── */
             commander() {
                 const selected = this.items.filter(i => this.checked[i.id]);
-                if (selected.length === 0) return;
+                const total = selected.reduce((sum, i) => sum + i.prix * i.quantite, 0);
 
-                const total = selected.reduce((s, i) => s + i.prix * i.quantite, 0);
+                fetch('{{ route("commandes.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        produits: selected,
+                        total: total
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("REPONSE SERVEUR :", data);
 
-                // -------------------------------------------------------
-                // ICI : envoyer la commande à votre backend via fetch
-                // -------------------------------------------------------
-                // fetch('/commandes', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                //     },
-                //     body: JSON.stringify({ produits: selected.map(i => ({ id: i.id, quantite: i.quantite })) })
-                // }).then(res => res.json()).then(data => { ... });
+                        if (data.success) {
+                            this.afficherConfirmation(selected, total);
 
-                // Afficher le modal de confirmation
+                            const commandedIds = selected.map(i => i.id);
+                            this.items = this.items.filter(i => !commandedIds.includes(i.id));
+                            commandedIds.forEach(id => delete this.checked[id]);
+                            this.save();
+                        } else {
+                            alert("ERREUR : " + data.error);
+                        }
+                    })
+                    .catch(err => console.error("Erreur:", err));
+            },
+
+            afficherConfirmation(selected, total) {
                 const detail = document.getElementById('modal-detail');
-                detail.innerHTML = selected.map(i =>
-                        `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #fed7aa;">
-                <span>${i.libelle} ×${i.quantite}</span>
-                <strong>${(i.prix * i.quantite).toLocaleString('fr-FR')} FCFA</strong>
-             </div>`
-                    ).join('') +
+                detail.innerHTML = selected.map(i => `
+                    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #fed7aa;">
+                        <span>${i.libelle} ×${i.quantite}</span>
+                        <strong>${(i.prix * i.quantite).toLocaleString('fr-FR')} FCFA</strong>
+                    </div>`).join('') +
                     `<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;">
-            <span>Total</span><span>${total.toLocaleString('fr-FR')} FCFA</span>
-         </div>`;
-
+                        <span>Total</span><span>${total.toLocaleString('fr-FR')} FCFA</span>
+                    </div>`;
                 document.getElementById('modal-confirmation').style.display = 'flex';
-
-                // Retirer les articles commandés du panier
-                const commandedIds = selected.map(i => i.id);
-                this.items = this.items.filter(i => !commandedIds.includes(i.id));
-                commandedIds.forEach(id => delete this.checked[id]);
-                this.save();
             },
 
             fermerModal() {
@@ -638,5 +599,4 @@
 
         document.addEventListener('DOMContentLoaded', () => PanierManager.init());
     </script>
-
 @endsection

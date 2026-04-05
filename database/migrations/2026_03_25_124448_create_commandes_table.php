@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('etat',[
                 'en_attente',
                 'en_préparation',
-                'expédie',
+                'prete',
                 'payee'
             ])->default('en_attente');
             $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');

@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Document</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 <body>
 
@@ -29,13 +30,13 @@
                     <a href="{{ route('gestion.produits') }}" class="isi-nav__link">
                         <i class="fa-solid fa-burger"></i> Produits
                     </a>
-                    <a href="#" class="isi-nav__link">
+                    <a href="{{ route('commandes.index') }}" class="isi-nav__link">
                         <i class="fa-solid fa-cart-shopping"></i> Commandes
                     </a>
-                    <a href="#" class="isi-nav__link">
+                    <a href="{{ route('gestion.recettes') }}" class="isi-nav__link">
                         <i class="fa-solid fa-credit-card"></i> Paiements
                     </a>
-                    <a href="#" class="isi-nav__link">
+                    <a href="{{ route('gestion.statistiques') }}" class="isi-nav__link">
                         <i class="fa-solid fa-chart-line"></i> Statistiques
                     </a>
 
@@ -43,12 +44,12 @@
                     <a href="{{ route('catalogue') }}" class="isi-nav__link">
                         <i class="fa-solid fa-burger"></i> Catalogue
                     </a>
-                    <a href="#" class="isi-nav__link">
+                    <a href="{{ route('panier') }}" class="isi-nav__link">
                         <i class="fa-solid fa-box"></i> Mes Commandes
                     </a>
 
                     {{-- ICÔNE PANIER avec badge dynamique --}}
-                    <a href="#" class="isi-nav__cart" style="position: relative; display: inline-flex; align-items: center;">
+                    <a href="{{ route('panier') }}" class="isi-nav__cart" style="position: relative; display: inline-flex; align-items: center;">
                         <i class="fa-solid fa-cart-shopping"></i>
                         {{-- Le badge : caché par défaut, mis à jour par Cart.updateBadge() --}}
                         <span class="isi-nav__badge"
