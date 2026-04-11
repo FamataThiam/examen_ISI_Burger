@@ -2,21 +2,23 @@ pipeline {
     agent any
 
     stages {
-        stage('Pull Code') {
+
+        stage('Checkout Code') {
             steps {
-                git branch: 'nom_prenom_burger', url: 'https://github.com/TON_USERNAME/TON_REPO.git'
+                git branch: 'Thiam_Famata_burger',
+                    url: 'https://github.com/FamataThiam/examen_ISI_Burger.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'composer install'
+                bat 'composer install'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t laravel-app .'
+                bat 'docker build -t laravel-app .'
             }
         }
     }
