@@ -83,7 +83,7 @@ class ClientLoginController extends Controller
             ->with('success', 'Inscription réussie !');
     }
 
-   // Deconnexion
+   // Deconnexion de l'user
     public function logout(Request $request)
     {
         Auth::guard('client')->logout();
