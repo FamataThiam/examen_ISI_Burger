@@ -15,7 +15,8 @@ class Client extends Authenticatable
         'adresse',
         'role',
     ];
-
+    // Le La propriété $hidden permet de masquer certains attributs
+    // sensibles du modèle lors de sa conversion en JSON ou tableau.
     protected $hidden = [
         'password',
         'remember_token',

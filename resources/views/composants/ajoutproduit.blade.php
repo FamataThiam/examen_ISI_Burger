@@ -84,7 +84,7 @@ const imageInfo = document.getElementById('image-label-info');
 title.innerText = "Modifier : " + produit.libelle;
 desc.innerText = "Modifiez les informations ci-dessous.";
 submitBtn.innerText = "Mettre à jour le Burger";
-imageInfo.style.display = "inline"; // Affiche l'info sur l'image
+imageInfo.style.display = "inline";
 
 // 2. Changer l'URL pour pointer vers produits.update
 form.action = `/produits/${produit.id}`;

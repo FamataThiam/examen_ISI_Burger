@@ -2,10 +2,10 @@
 @section('title', 'IsiBurger — Commandez en ligne')
 @section('content')
 
-    {{-- ═══════════════════════════════ HERO ═══════════════════════════════ --}}
+
     <section class="py-20 px-6" style="background: linear-gradient(145deg, #fff7ed 0%, #fef9f0 40%, #fff1e6 100%); position: relative; overflow: hidden;">
 
-        {{-- Blobs décoratifs --}}
+
         <div style="position:absolute; top:-120px; right:-120px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(249,115,22,0.13) 0%, transparent 70%); animation: blobDrift 8s ease-in-out infinite alternate;"></div>
         <div style="position:absolute; bottom:-80px; left:-80px; width:350px; height:350px; border-radius:50%; background:radial-gradient(circle, rgba(251,191,36,0.18) 0%, transparent 70%); animation: blobDrift 10s ease-in-out infinite alternate-reverse;"></div>
 
@@ -26,7 +26,7 @@
 
         <div class="max-w-6xl mx-auto relative z-10 flex flex-col lg:flex-row items-center gap-16">
 
-            {{-- Texte --}}
+
             <div class="flex-1 max-w-xl">
                 <div class="inline-flex items-center gap-2 bg-orange-100 text-orange-600 text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider mb-6 sr">
                     <span class="w-2 h-2 bg-orange-500 rounded-full animate-ping inline-block"></span>
@@ -68,7 +68,7 @@
                 </div>
             </div>
 
-            {{-- Visuel --}}
+
             <div class="flex-1 flex justify-center items-center relative">
                 <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
                     <div style="width:18rem; height:18rem; border-radius:50%; background:radial-gradient(circle, rgba(249,115,22,0.18) 0%, transparent 70%); filter:blur(30px);"></div>
@@ -87,7 +87,7 @@
         </div>
     </section>
 
-    {{-- ═══════════════════════════════ STATS ═══════════════════════════════ --}}
+
     <section class="py-10 px-6 bg-white">
         <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sr">
             <div class="stat-card p-6 text-center">
@@ -113,7 +113,7 @@
         </div>
     </section>
 
-    {{-- ═══════════════════════════════ MENU ═══════════════════════════════ --}}
+
     <section id="menu" class="py-24 px-6" style="background:#f8fafc;">
         <div class="max-w-6xl mx-auto">
             <div class="text-center mb-14 sr">
@@ -255,7 +255,7 @@
         </div>
     </section>
 
-    {{-- ═══════════════════════════════ HOW IT WORKS ═══════════════════════════════ --}}
+
     <section class="py-24 px-6 bg-white">
         <div class="max-w-5xl mx-auto">
             <div class="text-center mb-14 sr">
@@ -275,7 +275,7 @@
                         <i class="fa-solid fa-credit-card"></i>
                     </div>
                     <div class="font-extrabold text-slate-800 text-lg mb-2">2. Payez</div>
-                    <p class="text-slate-400 text-sm leading-relaxed">Paiement sécurisé en ligne ou à la livraison. Wave, Orange Money acceptés.</p>
+                    <p class="text-slate-400 text-sm leading-relaxed">Paiement sécurisé en ligne ou à la livraison. Seuls les paiements en espéces acceptés.</p>
                 </div>
                 <div class="text-center sr sr-delay-3">
                     <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-5 shadow-lg text-white" style="background: linear-gradient(135deg,#ef4444,#f97316);">
@@ -288,7 +288,7 @@
         </div>
     </section>
 
-    {{-- ═══════════════════════════════ CTA BAND ═══════════════════════════════ --}}
+
     <section class="py-20 px-6 sr" style="background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);">
         <div class="max-w-3xl mx-auto text-center">
             <i class="fa-solid fa-party-horn text-6xl text-white mb-5 block"></i>
@@ -301,7 +301,7 @@
                     J'en profite <i class="fa-solid fa-fire ml-1"></i>
                 </button>
             </div>
-            <p class="text-orange-200 text-xs mt-4 font-medium">Aucun spam. Désinscription à tout moment.</p>
+
         </div>
     </section>
 

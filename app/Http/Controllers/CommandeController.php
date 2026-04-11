@@ -47,11 +47,11 @@ class CommandeController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. VÉRIFICATION DES STOCKS (Point 1.8) [cite: 8]
+
             foreach ($produits as $item) {
                 $produit = Produit::find($item['id']);
                 if (!$produit || $produit->stock < $item['quantite']) {
-                    // Mail de refus si stock insuffisant [cite: 42]
+                    // Mail de refus
                     try {
                         Mail::to('famatat3@gmail.com')->send(new \App\Mail\CommandeRefuseeStock($produit->nom, $client->prenom));
                     } catch (\Exception $e) {}
@@ -60,18 +60,18 @@ class CommandeController extends Controller
                 }
             }
 
-            // 2. CRÉATION DE LA COMMANDE [cite: 14]
+
             $commande = Commande::create([
                 'date_commande' => now(),
                 'total'         => $total,
-                'etat'          => 'en_attente', // [cite: 20]
+                'etat'          => 'en_attente',
                 'client_id'     => $client->id
             ]);
 
-            // 3. APPEL AU PAIEMENT CONTROLLER (Ta demande) [cite: 24, 25]
+
             PaiementController::enregistrerPaiement($commande->id, $total);
 
-            // 4. PRODUITS ET STOCKS
+
             foreach ($produits as $item) {
                 $produit = Produit::find($item['id']);
 
@@ -83,12 +83,12 @@ class CommandeController extends Controller
                     'prixTotal'    => $item['prix'] * $item['quantite'],
                 ]);
 
-                $produit->decrement('stock', $item['quantite']); // Mise à jour du stock [cite: 8]
+                $produit->decrement('stock', $item['quantite']);
             }
 
             DB::commit();
 
-            // 5. MAIL DE CONFIRMATION [cite: 40]
+
             try {
                 Mail::to('famatat3@gmail.com')->send(new \App\Mail\ConfirmationCommande($commande));
             } catch (\Exception $e) {}
@@ -115,7 +115,7 @@ class CommandeController extends Controller
         }
 
         if ($commande->etat === 'prete') {
-            // Deuxième clic → on passe à payée
+            // Deuxième clic
             $commande->etat = 'payee';
             $commande->save();
 
@@ -123,13 +123,13 @@ class CommandeController extends Controller
                 ->with('success', 'Commande marquée comme payée !');
         }
 
-        // Premier clic → on passe à prête + envoi mail
+        // Premier clic
         $commande->etat = 'prete';
         $commande->save();
 
         try {
-            Mail::to($commande->client->email)
-                ->send(new FactureCommande($commande));
+            Mail::to('famatat3@gmail.com')->send(new \App\Mail\FactureCommande($commande));
+
 
         } catch (\Exception $e) {
             return back()->with('error', 'Commande prête mais erreur mail : ' . $e->getMessage());
@@ -199,9 +199,7 @@ class CommandeController extends Controller
 
     public function statistiques()
     {
-        // ================================
-        // 📈 COMMANDES PAR MOIS (POSTGRESQL)
-        // ================================
+
         $commandesParMois = DB::table('commandes')
             ->select(
                 DB::raw('EXTRACT(MONTH FROM created_at) as mois'),
@@ -224,22 +222,17 @@ class CommandeController extends Controller
             $dataCommandes[] = $item->total;
         }
 
-        // ================================
-        // 📊 PRODUITS PAR CATÉGORIE (ELOQUENT PROPRE)
-        // ================================
+
         $categories = Categorie::withCount('produits')->get();
 
         $labelsCategories = [];
         $dataProduits = [];
 
         foreach ($categories as $cat) {
-            $labelsCategories[] = $cat->libelle; // ✅ colonne correcte
+            $labelsCategories[] = $cat->libelle;
             $dataProduits[] = $cat->produits_count;
         }
 
-        // ================================
-        // 📤 ENVOI À LA VUE
-        // ================================
         return view('layout.gestionnaire.statistiques', compact(
             'labelsMois',
             'dataCommandes',

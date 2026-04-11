@@ -43,19 +43,19 @@
 
         @if(session('success'))
             <div style="background:#dcfce7; color:#166534; padding:12px 20px; border-radius:8px; margin-bottom:20px;">
-                ✅ {{ session('success') }}
+                 {{ session('success') }}
             </div>
         @endif
 
         @if(session('error'))
             <div style="background:#fee2e2; color:#991b1b; padding:12px 20px; border-radius:8px; margin-bottom:20px;">
-                ❌ {{ session('error') }}
+                 {{ session('error') }}
             </div>
         @endif
 
         @if(session('info'))
             <div style="background:#e0f2fe; color:#0369a1; padding:12px 20px; border-radius:8px; margin-bottom:20px;">
-                ℹ️ {{ session('info') }}
+                {{ session('info') }}
             </div>
         @endif
 

@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex min-h-screen bg-slate-50">
 
-        <!-- SIDEBAR -->
+
         <aside class="w-64 bg-white shadow-lg hidden md:block">
             <div class="p-6">
                 <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
@@ -14,7 +14,7 @@
             </div>
 
             <nav class="space-y-1 px-3">
-                <!-- ✅ ROUTE CORRIGÉE -->
+
                 <a href="{{ route('dashboardGestionnaire') }}"
                    class="flex items-center space-x-3 bg-orange-50 text-orange-600 px-4 py-3 rounded-xl font-bold">
                     <i class="fa-solid fa-chart-pie"></i>
@@ -43,15 +43,16 @@
             </nav>
         </aside>
 
-        <!-- MAIN -->
+
         <main class="flex-1 p-8">
 
-            <!-- HEADER -->
+
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
                     <h1 class="text-3xl font-extrabold text-slate-800">Tableau de bord</h1>
 
-                    <!-- ✅ SÉCURISATION AUTH -->
+                    {{-- Ici nous avons une condition ternaire si l'utilisateur est connecté et qu'on l'a bien récupéré on affiche son nom
+                    sinon on affiche juste le mot gestionnaire --}}
                     <p class="text-slate-500">
                         Bienvenue,
                         {{ auth('client')->check() ? auth('client')->user()->prenom : 'Gestionnaire' }}.
@@ -60,7 +61,7 @@
                 </div>
             </div>
 
-            <!-- STATS -->
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -88,7 +89,7 @@
                     <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-4">
                         <i class="fa-solid fa-check-double text-xl"></i>
                     </div>
-                    <h3 class="text-slate-500 text-sm font-medium">Validées (Aujourd'hui)</h3>
+                    <h3 class="text-slate-500 text-sm font-medium">Validées </h3>
                     <p class="text-2xl font-bold text-slate-800">
                         {{ $commandesValidees ?? 0 }}
                     </p>
@@ -106,7 +107,7 @@
 
             </div>
 
-            <!-- TABLE -->
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -130,7 +131,7 @@
                             <tbody class="divide-y divide-slate-50 text-sm">
                             @forelse($dernieresCommandes ?? [] as $commande)
                                 <tr>
-                                    <!-- ✅ SÉCURISATION CLIENT -->
+
                                     <td class="px-6 py-4 font-medium">
                                         {{ optional($commande->client)->prenom ?? 'N/A' }}
                                         {{ optional($commande->client)->nom ?? '' }}
@@ -161,8 +162,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center justify-center text-slate-400 text-center">
                     <i class="fa-solid fa-chart-line text-5xl mb-4 text-slate-200"></i>
                     <p class="font-medium">
-                        Les graphiques analytiques (Chart.js)<br>
-                        seront disponibles sur la page Statistiques.
+                        Voir la page des statistiques
                     </p>
                 </div>
 

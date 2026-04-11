@@ -1,11 +1,11 @@
-{{-- ═══════════════════════════════ FOOTER ═══════════════════════════════ --}}
+
 <footer class="pt-16 pb-8 px-6 relative z-0">
     <div class="max-w-6xl mx-auto relative z-10">
 
-        {{-- Top grid --}}
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
 
-            {{-- Brand --}}
+
             <div>
                 <div class="brand-font text-2xl select-none mb-4" style="filter: drop-shadow(0 0 18px rgba(249,115,22,0.4));">
                     <span class="text-red-400">isi</span>
@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            {{-- Menu --}}
+
             <div>
                 <h4 class="text-white text-xs font-extrabold uppercase tracking-widest mb-5">Nos Burgers</h4>
                 <ul class="space-y-3 text-sm">
@@ -37,7 +37,7 @@
                 </ul>
             </div>
 
-            {{-- Informations --}}
+
             <div>
                 <h4 class="text-white text-xs font-extrabold uppercase tracking-widest mb-5">Informations</h4>
                 <ul class="space-y-3 text-sm">
@@ -50,7 +50,7 @@
                 </ul>
             </div>
 
-            {{-- Contact --}}
+
             <div>
                 <h4 class="text-white text-xs font-extrabold uppercase tracking-widest mb-5">Contact & Horaires</h4>
                 <ul class="space-y-4 text-sm">
@@ -80,7 +80,7 @@
             </div>
         </div>
 
-        {{-- App + Paiements --}}
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
 
             <div class="rounded-2xl p-5 flex items-center gap-4" style="background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.08);">
@@ -103,32 +103,24 @@
 
             <div class="rounded-2xl p-5" style="background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.08);">
                 <p class="text-white font-extrabold text-sm mb-3">
-                    <i class="fa-solid fa-credit-card mr-2"></i> Moyens de paiement acceptés
+                    <i class="fa-solid fa-credit-card mr-2"></i> Moyen de paiement acceptés
                 </p>
                 <div class="flex flex-wrap gap-2">
                     <span class="bg-white/10 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-money-bill-transfer text-orange-400 mr-1"></i> Wave
+                        <i class="fa-solid fa-money-bill-transfer text-orange-400 mr-1"></i> Seules les paiements en espèces sont acceptées
                     </span>
-                    <span class="bg-white/10 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-mobile-button text-orange-500 mr-1"></i> Orange Money
-                    </span>
-                    <span class="bg-white/10 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-credit-card text-blue-400 mr-1"></i> Carte bancaire
-                    </span>
-                    <span class="bg-white/10 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-money-bill-1-wave text-green-400 mr-1"></i> Cash
-                    </span>
+
                 </div>
             </div>
         </div>
 
-        {{-- Bas de page --}}
+
         <div class="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
             <p>© 2026 <span class="text-orange-400 font-bold">IsiBurger</span>. Tous droits réservés.
                 Fait avec <i class="fa-solid fa-heart text-red-500"></i> à Dakar, Sénégal.
             </p>
             <div class="flex flex-wrap items-center gap-5">
-                <a href="#" class="hover:text-orange-400 transition-colors">CGU</a>
+
                 <a href="#" class="hover:text-orange-400 transition-colors">Confidentialité</a>
                 <a href="#" class="hover:text-orange-400 transition-colors">Cookies</a>
             </div>

@@ -1,26 +1,7 @@
 @extends('template')
 
 @section('content')
-    <style>
-        .finance-container { max-width: 1000px; margin: 40px auto; font-family: 'Inter', sans-serif; }
-        .stats-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white; padding: 30px; border-radius: 16px; margin-bottom: 30px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .stats-header h2 { margin: 0; font-size: 1.5rem; opacity: 0.9; }
-        .stats-header .amount { font-size: 2.2rem; font-weight: 800; color: #f97316; }
-
-        .table-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; padding: 15px 20px; text-align: left; color: #64748b; font-size: 0.75rem; text-transform: uppercase; }
-        td { padding: 18px 20px; border-top: 1px solid #f1f5f9; font-size: 0.9rem; }
-
-        .pay-badge {
-            background: #dcfce7; color: #15803d; padding: 4px 10px;
-            border-radius: 6px; font-weight: 700; font-size: 0.7rem;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/commandespayes.css') }}">
 
     <div class="finance-container">
         <div class="stats-header">

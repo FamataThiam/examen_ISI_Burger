@@ -29,7 +29,7 @@
 
     </div>
 </div>
-{{-- JS modal --}}
+
 <script>
     function toggleModal(modalId) {
         const modal = document.getElementById(modalId);
@@ -51,7 +51,7 @@
         }
     }
 
-    // Cacher tous les modals au chargement
+
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[id^="modal-"]').forEach(function (modal) {
             modal.style.display = 'none';
@@ -60,7 +60,7 @@
         });
     });
 
-    // Fermer en cliquant sur le fond noir
+
     window.addEventListener('click', function (event) {
         if (event.target.id && event.target.id.startsWith('modal-')) {
             toggleModal(event.target.id);

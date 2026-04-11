@@ -20,7 +20,7 @@ class ClientSeeder extends Seeder
                 'prenom' => 'Famata',
                 'adresse' => 'Dakar',
                 'email' => 'famata@gmail.com',
-                'password' => Hash::make('famata'), // mot de passe hashé
+                'password' => Hash::make('famata'),
                 'role' => 'gestionnaire',
                 'created_at' => now(),
                 'updated_at' => now(),

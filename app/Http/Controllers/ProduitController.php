@@ -50,7 +50,7 @@ class ProduitController extends Controller
         // Création du produit
         $produit = Produit::create($validated);
 
-        return redirect()->back()->with('success', 'Burger ajouté avec succès !');
+        return redirect()->back()->with('success', 'Produit ajouté avec succès !');
     }
 
     /**

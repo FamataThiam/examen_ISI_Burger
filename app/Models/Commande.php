@@ -21,6 +21,8 @@ class Commande extends Model
         'total'         => 'decimal:2',
         'etat'          => 'string',
     ];
+
+    /// Une commande appartient à un client
     public function client(): BelongsTo{
         return $this->belongsTo(Client::class);
 

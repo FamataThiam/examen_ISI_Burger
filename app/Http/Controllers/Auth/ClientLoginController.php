@@ -14,23 +14,22 @@ class ClientLoginController extends Controller
 {
     public function showLogin()
     {
-        // Si déjà connecté → on redirige directement
+
         if (Auth::guard('client')->check()) {
             return redirect()->route('dashboard');
         }
 
-        session()->forget('_old_input');
+        session()->forget('_old_input');  /// Vide les anciennes données du formulaire
         return view('layout.login');
     }
 
-    // ─── Login ────────────────────────────────────────────────────────────────
+
     public function login(Request $request)
     {
-        // validate() appelle withInput() automatiquement si ça échoue.
-        // On valide manuellement pour éviter ça sur le login.
+
         if (! $request->filled('email') || ! $request->filled('password')) {
             return back()->withErrors(['login_error' => 'Veuillez remplir tous les champs.']);
-            // Pas de withInput() → champs vides
+
         }
 
         $client = \App\Models\Client::where('email', $request->email)->first();
@@ -38,7 +37,7 @@ class ClientLoginController extends Controller
         if (! $client || ! \Illuminate\Support\Facades\Hash::check($request->password, $client->password)) {
             return back()
                 ->withErrors(['login_error' => 'Adresse e-mail ou mot de passe incorrect.']);
-            // Pas de withInput() → champs toujours vides
+
         }
 
         Auth::guard('client')->login($client);
@@ -48,7 +47,7 @@ class ClientLoginController extends Controller
             ->with('success', 'Connexion réussie !');
     }
 
-    // ─── Inscription ─────────────────────────────────────────────────────────
+
     public function register(Request $request)
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
@@ -84,7 +83,7 @@ class ClientLoginController extends Controller
             ->with('success', 'Inscription réussie !');
     }
 
-    // ─── Logout ───────────────────────────────────────────────────────────────
+
     public function logout(Request $request)
     {
         Auth::guard('client')->logout();
