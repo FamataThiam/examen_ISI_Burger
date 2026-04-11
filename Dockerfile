@@ -1,12 +1,23 @@
-FROM php:8.2-cli
+FROM php:8.3-cli
 
 WORKDIR /app
 
+# dépendances système
+RUN apt-get update && apt-get install -y \
+    unzip \
+    git \
+    curl
+
+# installer composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# copier projet
 COPY . .
 
-RUN apt-get update && apt-get install -y unzip git curl
+# installer dépendances Laravel
+RUN composer install --no-interaction --prefer-dist
 
-RUN curl -sS https://getcomposer.org/installer | php \
-    && php composer.phar install
+# exposer port
+EXPOSE 8000
 
 CMD php artisan serve --host=0.0.0.0 --port=8000
