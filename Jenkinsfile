@@ -10,16 +10,11 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'composer install'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 bat 'docker build -t laravel-app .'
             }
         }
+
     }
 }
